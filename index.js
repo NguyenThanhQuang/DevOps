@@ -1,81 +1,83 @@
 const express = require("express");
-const app = express();
-const port = 3000;
+const cors = require("cors");
 
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.use(cors());
 app.use(express.json());
 
-let tasks = [
-  { id: 1, name: "Học DevOps", completed: false },
-  { id: 2, name: "Làm bài tập lớn", completed: false },
-  { id: 3, name: "Đẩy code lên Github", completed: true },
+let items = [
+  { id: 1, name: "Item 1", description: "Đây là item đầu tiên" },
+  { id: 2, name: "Item 2", description: "Đây là item thứ hai" },
+  { id: 3, name: "Item 3", description: "Đây là item thứ ba" },
 ];
 let nextId = 4;
 
-app.get("/tasks", (req, res) => {
-  res.json(tasks);
-});
+app.post("/items", (req, res) => {
+  const { name, description } = req.body;
 
-app.get("/tasks/:id", (req, res) => {
-  const taskId = parseInt(req.params.id, 10);
-  const task = tasks.find((t) => t.id === taskId);
-  if (task) {
-    res.json(task);
-  } else {
-    res.status(404).json({ message: "Không tìm thấy công việc!" });
-  }
-});
-
-app.post("/tasks", (req, res) => {
-  const newTaskName = req.body.name;
-  if (!newTaskName) {
-    return res
-      .status(400)
-      .json({ message: "Tên công việc không được để trống" });
+  if (!name) {
+    return res.status(400).json({ message: "Tên của item là bắt buộc" });
   }
 
-  const isDuplicate = tasks.some((t) => t.name === newTaskName);
-  if (isDuplicate) {
-    return res
-      .status(409)
-      .json({ message: "Task name already exists" });
-  }
-
-  const newTask = {
+  const newItem = {
     id: nextId++,
-    name: newTaskName,
-    completed: false,
+    name: name,
+    description: description || "",
   };
-  tasks.push(newTask);
-  res.status(201).json(newTask);
+
+  items.push(newItem);
+  console.log("Đã tạo item mới:", newItem);
+  res.status(201).json(newItem);
 });
 
-app.put("/tasks/:id", (req, res) => {
-  const taskId = parseInt(req.params.id, 10);
-  const task = tasks.find((t) => t.id === taskId);
-  if (task) {
-    if (req.body.name !== undefined) {
-      task.name = req.body.name;
-    }
-    if (req.body.completed !== undefined) {
-      task.completed = typeof req.body.completed === "boolean"
-        ? req.body.completed
-        : req.body.completed === "true";
-    }
-    res.json(task);
+app.get("/items", (req, res) => {
+  console.log("Lấy danh sách tất cả items");
+  res.json(items);
+});
+
+app.get("/items/:id", (req, res) => {
+  const id = parseInt(req.params.id);
+  const item = items.find((i) => i.id === id);
+
+  if (item) {
+    console.log(`Lấy thông tin item với ID: ${id}`);
+    res.json(item);
   } else {
-    res.status(404).json({ message: "Task not found!" });
+    res.status(404).json({ message: "Không tìm thấy item" });
   }
 });
-  const taskId = parseInt(req.params.id, 10);
-  const taskIndex = tasks.findIndex((t) => t.id === taskId);
 
-  if (taskIndex !== -1) {
-    const deletedTask = tasks.splice(taskIndex, 1)[0];
-    res.status(200).json({ message: "Đã xóa công việc!", task: deletedTask });
+app.put("/items/:id", (req, res) => {
+  const id = parseInt(req.params.id);
+  const { name, description } = req.body;
+  const itemIndex = items.findIndex((i) => i.id === id);
+
+  if (itemIndex !== -1) {
+    items[itemIndex].name = name || items[itemIndex].name;
+    items[itemIndex].description = description || items[itemIndex].description;
+
+    console.log(`Đã cập nhật item với ID: ${id}`);
+    res.json(items[itemIndex]);
   } else {
-    res.status(404).json({ message: "Không tìm thấy công việc!" });
+    res.status(404).json({ message: "Không tìm thấy item để cập nhật" });
   }
+});
 
-app.listen(port, () => {
-  console.log(`Server API is running at http://localhost:${port}`);
+app.delete("/items/:id", (req, res) => {
+  const id = parseInt(req.params.id);
+  const initialLength = items.length;
+  items = items.filter((i) => i.id !== id);
+
+  if (items.length < initialLength) {
+    console.log(`Đã xóa item với ID: ${id}`);
+    res.status(200).json({ message: "Đã xóa item thành công" });
+  } else {
+    res.status(404).json({ message: "Không tìm thấy item để xóa" });
+  }
+});
+
+app.listen(PORT, () => {
+  console.log(`Server đang chạy tại http://localhost:${PORT}`);
 });
