@@ -10,7 +10,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: ./Server_API
+        working-directory: ./DevOps/Server_API
 
     steps:
       - name: Lấy code từ GitHub
