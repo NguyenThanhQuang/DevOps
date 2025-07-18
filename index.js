@@ -33,6 +33,13 @@ app.post("/tasks", (req, res) => {
       .json({ message: "Tên công việc không được để trống" });
   }
 
+  const isDuplicate = tasks.some((t) => t.name === newTaskName);
+  if (isDuplicate) {
+    return res
+      .status(409)
+      .json({ message: "Task name already exists" });
+  }
+
   const newTask = {
     id: nextId++,
     name: newTaskName,
@@ -45,32 +52,30 @@ app.post("/tasks", (req, res) => {
 app.put("/tasks/:id", (req, res) => {
   const taskId = parseInt(req.params.id, 10);
   const task = tasks.find((t) => t.id === taskId);
-
   if (task) {
     if (req.body.name !== undefined) {
       task.name = req.body.name;
     }
     if (req.body.completed !== undefined) {
-      task.completed = req.body.completed;
+      task.completed = typeof req.body.completed === "boolean"
+        ? req.body.completed
+        : req.body.completed === "true";
     }
     res.json(task);
   } else {
-    res.status(404).json({ message: "Không tìm thấy công việc!" });
+    res.status(404).json({ message: "Task not found!" });
   }
 });
-
-app.delete("/tasks/:id", (req, res) => {
   const taskId = parseInt(req.params.id, 10);
   const taskIndex = tasks.findIndex((t) => t.id === taskId);
 
   if (taskIndex !== -1) {
-    tasks.splice(taskIndex, 1);
-    res.status(204).send();
+    const deletedTask = tasks.splice(taskIndex, 1)[0];
+    res.status(200).json({ message: "Đã xóa công việc!", task: deletedTask });
   } else {
     res.status(404).json({ message: "Không tìm thấy công việc!" });
   }
-});
 
 app.listen(port, () => {
-  console.log(`Server API đang chạy tại http://localhost:${port}`);
+  console.log(`Server API is running at http://localhost:${port}`);
 });
