@@ -8,6 +8,10 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        working-directory: ./Server_API
+
     steps:
       - name: Lấy code từ GitHub
         uses: actions/checkout@v4
@@ -19,7 +23,6 @@ jobs:
 
       - name: Cài đặt thư viện
         run: npm install
-        working-directory: ./Server_API
 
       - name: Build Docker image
         run: docker build -t my-express-app .
