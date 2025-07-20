@@ -8,7 +8,7 @@ app.use(cors());
 app.use(express.json());
 
 let items = [
-  { id: 1, name: "Item 1", description: "Đây là item đầu tiên" },
+  { id: 1, name: "Item 1", description: "Đây là item thứ nhất" },
   { id: 2, name: "Item 2", description: "Đây là item thứ hai" },
   { id: 3, name: "Item 3", description: "Đây là item thứ ba" },
 ];
